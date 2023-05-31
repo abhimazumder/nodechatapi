@@ -1,0 +1,83 @@
+service: nodechatapi
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  region: ap-south-1
+  runtime: nodejs18.x
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:*
+        - s3:*
+      Resource: "*"
+
+functions:
+  signup:
+    handler: auth/signup.handler
+    events:
+      - http:
+          path: /auth/signup
+          method: POST
+          cors: true
+  login:
+    handler: auth/login.handler
+    events:
+      - http:
+          path: /auth/login
+          method: POST
+          cors: true
+  refresh:
+    handler: auth/refresh.handler
+    events:
+      - http:
+          path: /auth/refresh
+          method: POST
+          cors: true
+  name:
+    handler: user/name.handler
+    events:
+      - http:
+          path: /user/name
+          method: PUT
+          cors: true
+  profile-picture:
+    handler: user/profile-picture.handler
+    events:
+      - http:
+          path: /user/profile-picture
+          method: PUT
+          cors: true
+          
+
+resources:
+  Resources:
+    MyDynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: UserDetails
+        AttributeDefinitions:
+          - AttributeName: email
+            AttributeType: S
+        KeySchema:
+          - AttributeName: email
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+    MyS3Bucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        AccessControl: Private
+        CorsConfiguration:
+          CorsRules:
+            - AllowedOrigins:
+                - "*"
+              AllowedMethods:
+                - GET
+                - POST
+                - PUT
+                - DELETE
+              AllowedHeaders:
+                - "*"

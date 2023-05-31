@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "aws-sdk": "^2.1385.0",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.0",
+    "serverless": "^3.31.0",
+    "uuid": "^9.0.0",
+    "validator": "^13.9.0"
+  },
+  "name": "nodechatapi"
+}
