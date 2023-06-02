@@ -4,7 +4,7 @@
 
 <h3>1. Sign Up</h3>
 <p>Method: POST</p>
-<p>Endpoint: <code>/auth/signup</code></p>
+<p>URL: <code>https://hudgf7xx94.execute-api.ap-south-1.amazonaws.com/dev/auth/signup</code></p>
 <p>Request Headers:
 <pre><code>
 Content-Type: application/json
@@ -30,7 +30,7 @@ Content-Type: application/json
 
 <h3>2. Log In</h3>
 <p>Method: POST</p>
-<p>Endpoint: <code>/auth/login</code></p>
+<p>URL: <code>https://hudgf7xx94.execute-api.ap-south-1.amazonaws.com/dev/auth/login</code></p>
 <p>Request Headers:
 <pre><code>
 Content-Type: application/json
@@ -55,7 +55,7 @@ Content-Type: application/json
 
 <h3>3. Refresh Token</h3>
 <p>Method: POST</p>
-<p>Endpoint: <code>/auth/refresh</code></p>
+<p>URL: <code>https://hudgf7xx94.execute-api.ap-south-1.amazonaws.com/dev/auth/refresh</code></p>
 <p>Request Headers:
 <pre><code>
 Content-Type: application/json
@@ -79,7 +79,7 @@ Content-Type: application/json
 
 <h3>4. Update User Name</h3>
 <p>Method: PUT</p>
-<p>Endpoint: <code>/user/name</code></p>
+<p>URL: <code>https://hudgf7xx94.execute-api.ap-south-1.amazonaws.com/dev/user/name</code></p>
 <p>Request Headers:
 <pre><code>
 Content-Type: application/json
@@ -97,7 +97,7 @@ Authorization: Bearer JWT
 
 <h3>5. Update User Profile Picture</h3>
 <p>Method: POST</p>
-<p>Endpoint: <code>/user/profile-picture</code></p>
+<p>URL: <code>https://hudgf7xx94.execute-api.ap-south-1.amazonaws.com/dev/user/profile-picture</code></p>
 <p>Request Headers:
 <pre><code>
 Content-Type: multipart/form-data;
@@ -115,7 +115,7 @@ Authorization: Bearer JWT
 
 <h3>6. Update User Password</h3>
 <p>Method: PUT</p>
-<p>Endpoint: <code>/user/password</code></p>
+<p>URL: <code>https://hudgf7xx94.execute-api.ap-south-1.amazonaws.com/dev/user/password</code></p>
 <p>Request Headers:
 <pre><code>
 Content-Type: application/json
@@ -133,7 +133,7 @@ Authorization: Bearer JWT
 
 <h3>7. Get User by Email</h3>
 <p>Method: GET</p>
-<p>Endpoint: <code>/user/:email</code></p>
+<p>URL: <code>https://hudgf7xx94.execute-api.ap-south-1.amazonaws.com/dev/user/{email}</code></p>
 <p>Request Headers:
 <pre><code>
 Content-Type: application/json
