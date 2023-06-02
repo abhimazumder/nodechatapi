@@ -47,7 +47,7 @@ functions:
     events:
       - http:
           path: /user/profile-picture
-          method: PUT
+          method: POST
           cors: true
           
 

@@ -4,6 +4,7 @@ const AWS = require('aws-sdk');
 const validator = require('validator');
 const uuid = require('uuid');
 const { checkAuth } = require('../utils/checkAuth');
+const { formDataParser } = require('../utils/formDataParser');
 
 const s3 = new AWS.S3();
 const documentClient = new AWS.DynamoDB.DocumentClient();
@@ -17,26 +18,48 @@ module.exports.handler = async (event) => {
             statusCode = 401;
             throw new Error(response);
         };
-        
-        const params = {
-            Bucket: 'nodechatapi-dev-mys3bucket-uw9lggtd3eia',
-            Key: `${uuid.v4()}.jpg`,
-            Body: event.file,
-            ContentType: 'image/jpeg',
-          };
 
-          const s3Object = await s3.upload({params}).promise();
+        const fields = await formDataParser(event);
+        const file = fields.files.file;
 
-          const objectKey = s3Object.Key;
+        if (!file) {
+            statusCode = 400;
+            throw new Error("Image file is missing!");
+        }
+
+        const params1 = {
+            Bucket: "nodechatapi-dev-mys3bucket-uw9lggtd3eia",
+            Key: `${uuid.v4()}.${file.filename.filename.split(".").pop()}`,
+            Body: `${file.buffer.data}`,
+            ContentType: file.filename.mimetype
+        };
+
+        const data = await s3.upload(params1).promise();
+        const objectKey = data.Key;
+
+        const params2 = {
+            TableName: "UserDetails",
+            Key: {
+                email: response
+            },
+            UpdateExpression: 'SET #newField = :newValue',
+            ExpressionAttributeNames: {
+                '#newField': 'profilePicture'
+            },
+            ExpressionAttributeValues: {
+                ':newValue': `${objectKey}`
+            },
+        }
+
+        await documentClient.update(params2).promise();
 
         return {
             statusCode: 200,
             headers: {
                 "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Headers": "multipart/form-data",
-                "Access-Control-Allow-Methods": "PUT",
+                "Access-Control-Allow-Methods": "POST",
             },
-            body : objectKey,
         }
     }
     catch (err) {
@@ -45,7 +68,7 @@ module.exports.handler = async (event) => {
             headers: {
                 "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Headers": "multipart/form-data",
-                "Access-Control-Allow-Methods": "PUT",
+                "Access-Control-Allow-Methods": "POST",
             },
             body: JSON.stringify({
                 message: err.message,
@@ -54,8 +77,3 @@ module.exports.handler = async (event) => {
     }
 
 };
-
-
-/*
-
-            */
