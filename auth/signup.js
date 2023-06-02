@@ -1,7 +1,7 @@
 "use strict";
 
 const AWS = require("aws-sdk");
-const validator = require("validator");
+const { isEmail } = require('validator');
 const bcrypt = require("bcryptjs");
 const { createTokens } = require("../utils/createTokens");
 
@@ -18,7 +18,7 @@ module.exports.handler = async (event) => {
       throw new Error("Missing required fields: name, email, or password!");
     }
 
-    if (!validator.isEmail(email)) {
+    if (!isEmail(email)) {
       statusCode = 422;
       throw new Error("Invalid email address!");
     }

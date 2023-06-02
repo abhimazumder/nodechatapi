@@ -1,7 +1,7 @@
 "use strict";
 
 const AWS = require('aws-sdk');
-const validator = require('validator');
+const { isEmail } = require('validator');
 const uuid = require('uuid');
 const { checkAuth } = require('../utils/checkAuth');
 const { formDataParser } = require('../utils/formDataParser');
@@ -14,7 +14,7 @@ module.exports.handler = async (event) => {
 
     try {
         const response = checkAuth(event);
-        if (!validator.isEmail(response)) {
+        if (!isEmail(response)) {
             statusCode = 401;
             throw new Error(response);
         };
@@ -24,7 +24,7 @@ module.exports.handler = async (event) => {
 
         if (!file) {
             statusCode = 400;
-            throw new Error("Image file is missing!");
+            throw new Error("Image file is required!");
         }
 
         const params1 = {

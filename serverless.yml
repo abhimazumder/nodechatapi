@@ -49,6 +49,20 @@ functions:
           path: /user/profile-picture
           method: POST
           cors: true
+  password:
+    handler: user/password.handler
+    events:
+      - http:
+          path: /user/password
+          method: PUT
+          cors: true
+  email:
+    handler: user/email.handler
+    events:
+      - http:
+          path: /user/{email}
+          method: GET
+          cors: true
           
 
 resources:

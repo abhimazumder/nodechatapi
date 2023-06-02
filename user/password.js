@@ -2,6 +2,7 @@
 
 const AWS = require('aws-sdk');
 const { isEmail } = require('validator');
+const bcrypt = require("bcryptjs");
 const { checkAuth } = require('../utils/checkAuth');
 
 const documentClient = new AWS.DynamoDB.DocumentClient();
@@ -16,22 +17,25 @@ module.exports.handler = async (event) => {
             throw new Error(response);
         };
 
-        const { name } = JSON.parse(event.body);
+        const { password } = JSON.parse(event.body);
 
-        if (!name) {
+        if(!password){
             statusCode = 400;
-            throw new Error("Name field is required!");
+            throw new Error("New Password is required!");
         }
+
+        const salt = await bcrypt.genSalt(10);
+        const hash = await bcrypt.hash(password, salt);
 
         const params = {
             TableName: "UserDetails",
             Key: { email: response },
             UpdateExpression: "set #attrName = :attrValue",
             ExpressionAttributeNames: {
-                "#attrName": "name",
+                "#attrName": "password",
             },
             ExpressionAttributeValues: {
-                ":attrValue": name,
+                ":attrValue": hash,
             },
             ReturnValues: "UPDATED_NEW",
         }
@@ -60,5 +64,4 @@ module.exports.handler = async (event) => {
             }),
         };
     }
-
-};
+}
