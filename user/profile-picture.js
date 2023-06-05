@@ -28,16 +28,32 @@ module.exports.handler = async (event) => {
         }
 
         const params1 = {
+            TableName: "UserDetails",
+            Key: {
+                email: response
+            },
+        };
+
+        const data1 = await documentClient.get(params1).promise();
+
+        if (data1.Item.profilePicture) {
+            const params2 = {
+                Bucket: "nodechatapi-dev-mys3bucket-uw9lggtd3eia",
+                Key: data1.Item.profilePicture,
+            };
+            await s3.deleteObject(params2).promise();
+        }
+        const params3 = {
             Bucket: "nodechatapi-dev-mys3bucket-uw9lggtd3eia",
             Key: `${uuid.v4()}.${file.filename.filename.split(".").pop()}`,
             Body: `${file.buffer.data}`,
             ContentType: file.filename.mimetype
         };
 
-        const data = await s3.upload(params1).promise();
-        const objectKey = data.Key;
+        const data2 = await s3.upload(params3).promise();
+        const objectKey = data2.Key;
 
-        const params2 = {
+        const params4 = {
             TableName: "UserDetails",
             Key: {
                 email: response
@@ -50,8 +66,7 @@ module.exports.handler = async (event) => {
                 ':newValue': `${objectKey}`
             },
         }
-
-        await documentClient.update(params2).promise();
+        await documentClient.update(params4).promise();
 
         return {
             statusCode: 200,
@@ -63,17 +78,17 @@ module.exports.handler = async (event) => {
         }
     }
     catch (err) {
-        return {
-            statusCode: statusCode || 500,
-            headers: {
-                "Access-Control-Allow-Origin": "*",
-                "Access-Control-Allow-Headers": "multipart/form-data",
-                "Access-Control-Allow-Methods": "POST",
-            },
-            body: JSON.stringify({
-                message: err.message,
-            }),
-        };
-    }
+    return {
+        statusCode: statusCode || 500,
+        headers: {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Headers": "multipart/form-data",
+            "Access-Control-Allow-Methods": "POST",
+        },
+        body: JSON.stringify({
+            message: err.message,
+        }),
+    };
+}
 
 };
