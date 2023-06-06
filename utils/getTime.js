@@ -1,4 +1,4 @@
-const getTime = () => {
+const generateDate = () => {
     const now = new Date();
 
     const year = now.getFullYear();
@@ -9,7 +9,29 @@ const getTime = () => {
     const minute = ("0" + now.getMinutes()).slice(-2);
     const second = ("0" + now.getSeconds()).slice(-2);
 
+    return {
+        year : year,
+        month : month,
+        day : day,
+        hour : hour,
+        minute : minute,
+        second : second
+    }
+}
+
+const getDateTime = () => {
+    const { year, month, day, hour, minute, second } = generateDate();
     return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
 }
 
-module.exports = { getTime }
+const getDate = () => {
+    const { year, month, day } = generateDate();
+    return `${year}-${month}-${day}`;
+}
+
+const getTime = () => {
+    const { hour, minute, second } = generateDate();
+    return `${hour}:${minute}:${second}`;
+}
+
+module.exports = { getDateTime, getDate, getTime };

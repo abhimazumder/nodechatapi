@@ -22,7 +22,7 @@ module.exports.handler = async (event) => {
         }
 
         const params1 = {
-            TableName: "UserDetails",
+            TableName: 'UserDetails',
             Key: {
                 email: email
             },

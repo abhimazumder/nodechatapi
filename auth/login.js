@@ -14,7 +14,7 @@ module.exports.handler = async (event) => {
 
         if (!email || !password) {
             statusCode = 400;
-            throw new Error("Missing required fields: email, or password!");
+            throw new Error("Missing required fields: email or password!");
         }
 
         if (!isEmail(email)) {

@@ -2,7 +2,7 @@
 
 const AWS = require('aws-sdk');
 const { isEmail } = require('validator');
-const uuid = require('uuid');
+const { v4 } = require('uuid');
 const { checkAuth } = require('../utils/checkAuth');
 const { formDataParser } = require('../utils/formDataParser');
 
@@ -19,8 +19,8 @@ module.exports.handler = async (event) => {
             throw new Error(response);
         };
 
-        const fields = await formDataParser(event);
-        const file = fields.files.file;
+        const formData = await formDataParser(event);
+        const file = formData.files.file;
 
         if (!file) {
             statusCode = 400;
@@ -45,7 +45,7 @@ module.exports.handler = async (event) => {
         }
         const params3 = {
             Bucket: "nodechatapi-dev-mys3bucket-uw9lggtd3eia",
-            Key: `${uuid.v4()}.${file.filename.filename.split(".").pop()}`,
+            Key: `${v4()}_${file.filename.filename.split(".").pop()}`,
             Body: `${file.buffer.data}`,
             ContentType: file.filename.mimetype
         };

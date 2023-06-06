@@ -4,7 +4,7 @@ const AWS = require("aws-sdk");
 const bcrypt = require("bcryptjs");
 const { isEmail } = require('validator');
 const { createTokens } = require("../utils/createTokens");
-const { getTime } = require("../utils/getTime");
+const { getDateTime } = require("../utils/getTime");
 
 const documentClient = new AWS.DynamoDB.DocumentClient();
 
@@ -47,7 +47,7 @@ module.exports.handler = async (event) => {
         name: name,
         email: email,
         password: hash,
-        createdAt : getTime(),
+        createdAt : getDateTime(),
       },
     };
 

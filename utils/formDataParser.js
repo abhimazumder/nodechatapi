@@ -1,5 +1,4 @@
 const busboy = require('busboy');
-const uuid = require('uuid');
 
 function formDataParser(event) {
   return new Promise((resolve, reject) => {

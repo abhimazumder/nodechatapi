@@ -63,6 +63,13 @@ functions:
           path: /user/{email}
           method: GET
           cors: true
+  message:
+    handler: message/message.handler
+    events:
+      - http:
+          path: /message
+          method: POST
+          cors: true
           
 
 resources:
@@ -80,6 +87,23 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 5
           WriteCapacityUnits: 5
+    MyDynamoDBTable2:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: MessageDetails
+        AttributeDefinitions:
+          - AttributeName: senderEmail
+            AttributeType: S
+          - AttributeName: _id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: senderEmail
+            KeyType: HASH
+          - AttributeName: _id
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
     MyS3Bucket:
       Type: AWS::S3::Bucket
       Properties:
@@ -93,5 +117,19 @@ resources:
                 - POST
                 - PUT
                 - DELETE
+              AllowedHeaders:
+                - "*"
+    MyS3Bucket2:
+      Type: AWS::S3::Bucket
+      Properties:
+        AccessControl: Private
+        CorsConfiguration:
+          CorsRules:
+            - AllowedOrigins:
+                - "*"
+              AllowedMethods:
+                - GET
+                - POST
+                - PUT
               AllowedHeaders:
                 - "*"
