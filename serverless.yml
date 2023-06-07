@@ -70,6 +70,13 @@ functions:
           path: /message
           method: POST
           cors: true
+  messages:
+    handler: message/messages.handler
+    events:
+      - http:
+          path: /messages
+          method: GET
+          cors: true
           
 
 resources:

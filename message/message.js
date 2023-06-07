@@ -14,9 +14,8 @@ module.exports.handler = async (event) => {
     try {
         const response = checkAuth(event);
         if (!isEmail(response)) {
-            const error = new Error(response);
-            error.code = 401;
-            throw error;
+            response.statusCode = 401;
+            throw response;
         }
         const contentType = event.headers['Content-Type'];
         let _id;
@@ -44,7 +43,7 @@ module.exports.handler = async (event) => {
         };
     } catch (err) {
         return {
-            statusCode: err.code || 500,
+            statusCode: err.statusCode || 500,
             headers: {
                 "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Headers": "Content-Type",
@@ -52,7 +51,6 @@ module.exports.handler = async (event) => {
             },
             body: JSON.stringify({
                 message: err.message,
-                input: event,
             }),
         };
     }
