@@ -45,7 +45,7 @@ module.exports.handler = async (event) => {
         }
         const params3 = {
             Bucket: "nodechatapi-dev-mys3bucket-uw9lggtd3eia",
-            Key: `${v4()}_${file.filename.filename.split(".").pop()}`,
+            Key: `${v4()}_${file.filename.filename}`,
             Body: `${file.buffer.data}`,
             ContentType: file.filename.mimetype
         };

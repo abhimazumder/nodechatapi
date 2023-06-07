@@ -23,7 +23,7 @@ module.exports.handler = async (event) => {
 
         if (contentType === 'application/json') {
             _id = await handleApplicationJSON(event, response);
-        } else if (contentType.includes('multipart/form-data')) {
+        } else if (contentType.startsWith('multipart/form-data')) {
             _id = await handleMultiPartFormData(event, response);
         } else {
             const error = new Error('Unsupported Content-Type!');
@@ -82,7 +82,7 @@ const handleApplicationJSON = async (event, sender) => {
         throw error;
     }
     
-    const objectKey = `${sender}/${getDate()}/${receiver}/${v4()}_${getDate()}.txt`;
+    const objectKey = `${sender}/${getDate()}/${receiver}/${v4()}.txt`;
 
     const params2 = {
         Bucket: 'nodechatapi-dev-mys3bucket2-1dyh810yatk7',
@@ -140,13 +140,13 @@ const handleMultiPartFormData = async (event, sender) => {
         throw error;
     }
 
-    const objectKey = `${sender}/${getDate()}/${receiver}/${v4()}_${file.filename.split(".").pop()}`;
+    const objectKey = `${sender}/${getDate()}/${receiver}/${v4()}_${file.filename.filename}`;
 
     const params2 = {
         Bucket: "nodechatapi-dev-mys3bucket2-1dyh810yatk7",
         Key: objectKey,
         Body: file.buffer,
-        ContentType: file.mimetype,
+        ContentType: file.filename.mimetype,
     };
 
     await s3.upload(params2).promise();
@@ -158,7 +158,7 @@ const handleMultiPartFormData = async (event, sender) => {
         Item: {
             _id: _id,
             content: objectKey,
-            isMedia: false,
+            isMedia: true,
             senderEmail: sender,
             receiverEmail: receiver,
             createdAt: getDateTime(),

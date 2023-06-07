@@ -2,7 +2,10 @@ const busboy = require('busboy');
 
 function formDataParser(event) {
   return new Promise((resolve, reject) => {
-    const busboyInstance = busboy({ headers: event.headers });
+
+    const contentType = event.headers['Content-Type'];
+    
+    const busboyInstance = busboy({ headers: { 'content-type': contentType, ...event.headers } });
 
     const files = {};
     const fields = {};
