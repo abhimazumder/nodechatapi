@@ -2,6 +2,7 @@
 
 const AWS = require('aws-sdk');
 const { isEmail } = require('validator');
+const { checkAuth } = require('../utils/checkAuth');
 
 const documentClient = new AWS.DynamoDB.DocumentClient();
 

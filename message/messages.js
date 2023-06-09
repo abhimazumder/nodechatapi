@@ -15,24 +15,8 @@ module.exports.handler = async (event) => {
             throw response;
         };
 
-        const params = {
-            TableName: 'MessageDetails',
-        };
-
-        const data = await documentClient.scan(params).promise();
-
-        for (const message of data.Items) {
-            const fileExtension = message.content.split('.').pop();
-            if (fileExtension.toLowerCase() === 'txt') {
-                const params = {
-                    Bucket: 'nodechatapi-dev-mys3bucket2-1dyh810yatk7',
-                    Key: message.content,
-                };
-                const data = await s3.getObject(params).promise();
-                message.content = data.Body.toString('utf-8');
-            }
-        }
-
+        const { email } = event.pathParameters; 
+        
         return {
             statusCode: 200,
             headers: {
@@ -40,7 +24,7 @@ module.exports.handler = async (event) => {
                 "Access-Control-Allow-Headers": "Content-Type",
                 "Access-Control-Allow-Methods": "GET",
             },
-            body: JSON.stringify(data.Items),
+            body: email ? JSON.stringify(handleMessage(email)) : JSON.stringify(handleAllMessages()),
         };
     }
     catch (err) {
@@ -56,4 +40,50 @@ module.exports.handler = async (event) => {
             }),
         };
     }
+}
+
+const handleAllMessages = async () => {
+    const params = {
+        TableName: 'MessageDetails',
+    };
+
+    const data = await documentClient.scan(params).promise();
+
+    return formatData(data.Items);
+}
+
+const handleMessage = async (email) => {
+    const params = {
+        TableName: 'MessageDetails',
+        FilterExpression: '#field = :value',
+        ExpressionAttributeNames: {
+          '#field': 'senderEmail',
+        },
+        ExpressionAttributeValues: {
+          ':value': email,
+        },
+    };
+
+    const data = await dynamodb.scan(params).promise();
+
+    return formatData(data.Items);  
+}
+
+const formatData = async (dataItems) => {
+    for (const message of dataItems) {
+        const params = {
+            Bucket: 'nodechatapi-dev-mys3bucket2-1dyh810yatk7',
+            Key: message.content,
+        };
+        const data = await s3.getObject(params).promise();
+        const fileExtension = message.content.split('.').pop();
+        if (fileExtension.toLowerCase() === 'txt') {
+            message.content = data.Body.toString('utf-8');
+        } else {
+            const imageString = new Buffer.from(data.Body).toString('base64');
+            message.content = imageString;
+        }
+    }
+
+    return dataItems;
 }
