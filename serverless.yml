@@ -77,8 +77,8 @@ functions:
           path: /messages
           method: GET
           cors: true
-  messages/email:
-    handler: message/messages.handler
+  messages_email:
+    handler: message/messages_email.handler
     events:
       - http:
           path: /messages/{email}

@@ -15,8 +15,23 @@ module.exports.handler = async (event) => {
             throw response;
         };
         
+        const { email } = event.pathParameters;
+
+        if(!email){
+            const error = new Error("Email parameter is missing!");
+            error.statusCode = 400;
+            throw error;
+        }
+
         const params = {
             TableName: 'MessageDetails',
+            FilterExpression: '#field = :value',
+            ExpressionAttributeNames: {
+              '#field': 'senderEmail',
+            },
+            ExpressionAttributeValues: {
+              ':value': email,
+            },
         };
     
         const data = await documentClient.scan(params).promise();
