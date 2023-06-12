@@ -7,13 +7,13 @@ const checkAuth = (event) => {
         const authorizationHeader = event.headers["Authorization"];
 
         if (!authorizationHeader) {
-            throw new Error("Missing Authorization header");
+            throw new Error("Missing Authorization header!");
         }
 
         const [bearer, token] = authorizationHeader.split(" ");
 
         if (bearer !== "Bearer" || !token) {
-            throw new Error("Invalid Authorization header format");
+            throw new Error("Invalid Authorization header format!");
         }
 
         var decoded = jwt.verify(token, "process.env.SECURE_KEY");

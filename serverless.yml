@@ -98,8 +98,7 @@ functions:
           path: /messages/{email}
           method: GET
           cors: true
-          
-
+                    
 resources:
   Resources:
     MyDynamoDBTable:
