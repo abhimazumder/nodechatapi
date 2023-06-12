@@ -10,21 +10,21 @@ const s3 = new AWS.S3();
 const documentClient = new AWS.DynamoDB.DocumentClient();
 
 module.exports.handler = async (event) => {
-    let statusCode;
-
     try {
         const response = checkAuth(event);
         if (!isEmail(response)) {
-            statusCode = 401;
-            throw new Error(response);
+            const error = new Error(response);
+            error.statusCode = 401;
+            throw error;
         };
 
         const formData = await formDataParser(event);
         const file = formData.files.file;
 
         if (!file) {
-            statusCode = 400;
-            throw new Error("Image file is required!");
+            const error = new Error("Image file is required!");
+            error.statusCode = 400;
+            throw error;
         }
 
         const params1 = {
@@ -79,7 +79,7 @@ module.exports.handler = async (event) => {
     }
     catch (err) {
     return {
-        statusCode: statusCode || 500,
+        statusCode: err.statusCode || 500,
         headers: {
             "Access-Control-Allow-Origin": "*",
             "Access-Control-Allow-Headers": "multipart/form-data",

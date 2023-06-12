@@ -7,19 +7,20 @@ const { checkAuth } = require('../utils/checkAuth');
 const documentClient = new AWS.DynamoDB.DocumentClient();
 
 module.exports.handler = async (event) => {
-    let statusCode;
     try {
         const response = checkAuth(event);
         if (!isEmail(response)) {
-            statusCode = 401;
-            throw new Error(response);
+            const error = new Error(response);
+            error.statusCode = 401;
+            throw error;
         };
 
         const { email } = event.pathParameters;
 
         if (!email) {
-            statusCode = 400;
-            throw new Error("Email is required!");
+            const error = new Error("Email is required!");
+            error.statusCode = 400;
+            throw error;
         }
 
         const params1 = {
@@ -32,8 +33,10 @@ module.exports.handler = async (event) => {
         const data = await documentClient.get(params1).promise();
 
         if (!data.Item) {
-            statusCode = 404;
-            throw new Error("User doesn't exist!");
+            const error = new Error("User doesn't exist!");
+            error.statusCode = 400;
+            throw error;
+            
         }
 
         const { name, profilePicture, createdAt } = data.Item;
@@ -54,7 +57,7 @@ module.exports.handler = async (event) => {
         }
     } catch (err) {
         return {
-            statusCode: statusCode || 500,
+            statusCode: err.statusCode || 500,
             headers: {
                 "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Headers": "Content-Type",

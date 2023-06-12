@@ -7,20 +7,20 @@ const { checkAuth } = require('../utils/checkAuth');
 const documentClient = new AWS.DynamoDB.DocumentClient();
 
 module.exports.handler = async (event) => {
-    let statusCode;
-
     try {
         const response = checkAuth(event);
         if (!isEmail(response)) {
-            statusCode = 401;
-            throw new Error(response);
+            const error = new Error(response);
+            error.statusCode = 401;
+            throw error;
         };
 
         const { name } = JSON.parse(event.body);
 
         if (!name) {
-            statusCode = 400;
-            throw new Error("Name field is required!");
+            const error = new Error("Name field is required!");
+            error.statusCode = 400;
+            throw error;
         }
 
         const params = {
@@ -49,7 +49,7 @@ module.exports.handler = async (event) => {
     }
     catch (err) {
         return {
-            statusCode: statusCode || 500,
+            statusCode: err.statusCode || 500,
             headers: {
                 "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Headers": "Content-Type",

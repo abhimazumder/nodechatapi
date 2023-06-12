@@ -8,18 +8,19 @@ const { createTokens } = require("../utils/createTokens");
 const documentClient = new AWS.DynamoDB.DocumentClient();
 
 module.exports.handler = async (event) => {
-    let statusCode;
     try {
         const { email, password } = JSON.parse(event.body);
 
         if (!email || !password) {
-            statusCode = 400;
-            throw new Error("Missing required fields: email or password!");
+            const error = new Error("Missing required fields: email or password!");
+            error.statusCode = 400;
+            throw error;
         }
 
         if (!isEmail(email)) {
-            statusCode = 422;
-            throw new Error("Invalid email address!");
+            const error = new Error("Invalid email address!");
+            error.statusCode = 422;
+            throw error;
         }
 
         const params = {
@@ -32,15 +33,17 @@ module.exports.handler = async (event) => {
         const data = await documentClient.get(params).promise();
 
         if (!data.Item) {
-            statusCode = 404;
-            throw new Error("User doesn't exists!");
+            const error = new Error("User doesn't exists!");
+            error.statusCode = 404;
+            throw error;
         }
 
         const isValid = await bcrypt.compare(password, data.Item.password);
 
         if (!isValid) {
-            statusCode = 400;
-            throw new Error("Email/Password is not valid!")
+            const error = new Error("Email/Password is not valid!");
+            error.statusCode = 400;
+            throw error;
         }
 
         const tokens = createTokens(email);
@@ -59,7 +62,7 @@ module.exports.handler = async (event) => {
     }
     catch (err) {
         return {
-            statusCode: statusCode || 500,
+            statusCode: err.statusCode || 500,
             headers: {
                 "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Headers": "Content-Type",

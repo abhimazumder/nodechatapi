@@ -8,7 +8,9 @@ module.exports.handler = async (event) => {
         const { refreshToken } = JSON.parse(event.body);
 
         if (!refreshToken) {
-            throw new Error("Refresh token is required!");
+            const error = new Error("Refresh token is required!");
+            error.statusCode(402)
+            throw error;
         }
 
         var decoded = jwt.verify(refreshToken, "process.env.SECURE_KEY");
@@ -29,7 +31,7 @@ module.exports.handler = async (event) => {
     }
     catch (err) {
         return {
-            statusCode: 400,
+            statusCode: err.statusCode || 500,
             headers: {
                 "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Headers": "Content-Type",

@@ -9,19 +9,20 @@ const { getDateTime } = require("../utils/getTime");
 const documentClient = new AWS.DynamoDB.DocumentClient();
 
 module.exports.handler = async (event) => {
-  let statusCode;
-
   try {
     const { name, email, password } = JSON.parse(event.body);
 
     if (!name || !email || !password) {
-      statusCode = 400;
-      throw new Error("Missing required fields: name, email, or password!");
+      const error = new Error("Missing required fields: name, email, or password!");
+      error.statusCode(400)
+      throw error;
+
     }
 
     if (!isEmail(email)) {
-      statusCode = 422;
-      throw new Error("Invalid email address!");
+      const error = new Error("Invalid email address!");
+      error.statusCode(422)
+      throw error;
     }
 
     const params1 = {
@@ -47,7 +48,7 @@ module.exports.handler = async (event) => {
         name: name,
         email: email,
         password: hash,
-        createdAt : getDateTime(),
+        createdAt: getDateTime(),
       },
     };
 

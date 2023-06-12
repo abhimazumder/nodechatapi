@@ -8,20 +8,20 @@ const { checkAuth } = require('../utils/checkAuth');
 const documentClient = new AWS.DynamoDB.DocumentClient();
 
 module.exports.handler = async (event) => {
-    let statusCode;
-
     try {
         const response = checkAuth(event);
         if (!isEmail(response)) {
-            statusCode = 401;
-            throw new Error(response);
+            const error = new Error(response);
+            error.statusCode = 401;
+            throw error;
         };
 
         const { password } = JSON.parse(event.body);
 
         if(!password){
-            statusCode = 400;
-            throw new Error("New Password is required!");
+            const error = new Error("New Password is required!");
+            error.statusCode = 400;
+            throw error;
         }
 
         const salt = await bcrypt.genSalt(10);
@@ -53,7 +53,7 @@ module.exports.handler = async (event) => {
     }
     catch (err) {
         return {
-            statusCode: statusCode || 500,
+            statusCode: err.statusCode || 500,
             headers: {
                 "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Headers": "Content-Type",
