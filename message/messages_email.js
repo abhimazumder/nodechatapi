@@ -36,7 +36,9 @@ module.exports.handler = async (event) => {
     
         const data = await documentClient.scan(params).promise();
     
-        const dataItems = await fetchContent(data.Items);
+        for(let item of data.Items){
+            item = await fetchContent(item);
+        }
 
         return {
             statusCode: 200,
@@ -45,7 +47,7 @@ module.exports.handler = async (event) => {
                 "Access-Control-Allow-Headers": "Content-Type",
                 "Access-Control-Allow-Methods": "GET",
             },
-            body: JSON.stringify(dataItems),
+            body: JSON.stringify(data.Items),
         };
     }
     catch (err) {

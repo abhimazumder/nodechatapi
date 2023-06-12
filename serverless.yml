@@ -56,11 +56,25 @@ functions:
           path: /user/password
           method: PUT
           cors: true
-  email:
-    handler: user/email.handler
+  _email:
+    handler: user/_email.handler
     events:
       - http:
           path: /user/{email}
+          method: GET
+          cors: true
+  chat_messageId:
+    handler: media/chat_messageId.handler
+    events:
+      - http:
+          path: /media/chat/{messageId}
+          method: GET
+          cors: true
+  profile-picture_email:
+    handler: media/profile-picture_email.handler
+    events:
+      - http:
+          path: /media/profile-picture/{email}
           method: GET
           cors: true
   message:

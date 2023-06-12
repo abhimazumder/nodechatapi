@@ -18,7 +18,7 @@ module.exports.handler = async (event) => {
         }
 
         if (!isEmail(email)) {
-            const error = new Error("Invalid email address!");
+            const error = new Error("Email is not valid!");
             error.statusCode = 422;
             throw error;
         }

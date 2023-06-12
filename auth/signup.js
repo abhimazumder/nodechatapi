@@ -20,7 +20,7 @@ module.exports.handler = async (event) => {
     }
 
     if (!isEmail(email)) {
-      const error = new Error("Invalid email address!");
+      const error = new Error("Email is not valid!");
       error.statusCode(422)
       throw error;
     }
@@ -36,7 +36,7 @@ module.exports.handler = async (event) => {
 
     if (data.Item) {
       statusCode = 409;
-      throw new Error("Email address already exists!");
+      throw new Error("Email already exists!");
     }
 
     const salt = await bcrypt.genSalt(10);

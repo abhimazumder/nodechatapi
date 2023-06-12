@@ -11,19 +11,43 @@ module.exports.handler = async (event) => {
     try {
         const response = checkAuth(event);
         if (!isEmail(response)) {
-            response.statusCode = 401;
-            throw response;
+            const error = new Error(response);
+            error.statusCode = 401;
+            throw error;
         };
-        
+
+        const { messageId } = event.pathParameters;
+
+        if(!messageId){
+            const error = new Error("MessageId is missing!");
+            error.statusCode = 400;
+            throw error;
+        }
+
         const params = {
             TableName: 'MessageDetails',
+            Key: {
+              senderEmail: `${response}`,
+              _id: `${messageId}`,
+            },
         };
-    
-        const data = await documentClient.scan(params).promise();
+          
+        const data = await documentClient.get(params).promise();
 
-        for(let item of data.Items){
-            item = await fetchContent(item);
+        if(!data.Item){
+            const error = new Error("MessageId is not valid!");
+            error.statusCode = 404;
+            throw error;
         }
+
+        if(!data.Item.isMedia){
+            const error = new Error("Content is not media!");
+            error.statusCode = 415;
+            throw error;
+        }
+
+        const message = await fetchContent(data.Item);
+
         return {
             statusCode: 200,
             headers: {
@@ -31,10 +55,10 @@ module.exports.handler = async (event) => {
                 "Access-Control-Allow-Headers": "Content-Type",
                 "Access-Control-Allow-Methods": "GET",
             },
-            body: JSON.stringify(data.Items),
-        };
+            body: JSON.stringify(message.content),
+        }
     }
-    catch (err) {
+    catch(err){
         return {
             statusCode: err.statusCode || 500,
             headers: {
@@ -43,8 +67,8 @@ module.exports.handler = async (event) => {
                 "Access-Control-Allow-Methods": "GET",
             },
             body: JSON.stringify({
-                message: err.message,
-            }),
+                message: err.message
+            })
         };
     }
 }

@@ -1,23 +1,21 @@
 const AWS = require('aws-sdk');
+
 const s3 = new AWS.S3();
 
-const fetchContent = async (dataItems) => {
-    for (const message of dataItems) {
+const fetchContent = async (item) => {
         const params = {
             Bucket: 'nodechatapi-dev-mys3bucket2-1dyh810yatk7',
-            Key: message.content,
+            Key: item.content,
         };
         const data = await s3.getObject(params).promise();
-        const fileExtension = message.content.split('.').pop();
+        const fileExtension = item.content.split('.').pop();
         if (fileExtension.toLowerCase() === 'txt') {
-            message.content = data.Body.toString('utf-8');
+            item.content = data.Body.toString('utf-8');
         } else {
-            const imageString = new Buffer.from(data.Body).toString('base64');
-            message.content = imageString;
+            item.content = new Buffer.from(data.Body).toString('base64');
         }
-    }
 
-    return dataItems;
+    return item;
 }
 
 module.exports = { fetchContent };
