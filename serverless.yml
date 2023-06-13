@@ -77,6 +77,13 @@ functions:
           path: /media/profile-picture/{email}
           method: GET
           cors: true
+  token:
+    handler: media/token.handler
+    events:
+      - http:
+          path: /media/token
+          method: GET
+          cors: true
   message:
     handler: message/message.handler
     events:

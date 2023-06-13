@@ -1,7 +1,6 @@
 "use strict";
 
 const AWS = require('aws-sdk');
-const { isEmail } = require('validator');
 const { v4 } = require('uuid');
 const { checkAuth } = require('../utils/checkAuth');
 const { getDate, getDateTime } = require('../utils/getTime');
@@ -12,18 +11,15 @@ const s3 = new AWS.S3();
 
 module.exports.handler = async (event) => {
     try {
-        const response = checkAuth(event);
-        if (!isEmail(response)) {
-            response.statusCode = 401;
-            throw response;
-        }
+        const { email, token } = checkAuth(event);
+
         const contentType = event.headers['Content-Type'];
         let _id;
 
         if (contentType === 'application/json') {
-            _id = await handleApplicationJSON(event, response);
+            _id = await handleApplicationJSON(event, email);
         } else if (contentType.startsWith('multipart/form-data')) {
-            _id = await handleMultiPartFormData(event, response);
+            _id = await handleMultiPartFormData(event, email);
         } else {
             const error = new Error('Unsupported Content-Type!');
             error.code = 415;
@@ -42,16 +38,19 @@ module.exports.handler = async (event) => {
             })
         };
     } catch (err) {
+        if (err.message === "jwt malformed" || err.message === "jwt expired") {
+            err.statusCode = 403;
+        }
         return {
             statusCode: err.statusCode || 500,
             headers: {
                 "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Headers": "Content-Type",
-                "Access-Control-Allow-Methods": "POST",
+                "Access-Control-Allow-Methods": "GET",
             },
             body: JSON.stringify({
-                message: err.message,
-            }),
+                message: err.message
+            })
         };
     }
 };

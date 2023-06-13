@@ -1,20 +1,11 @@
 "use strict";
 
 const AWS = require('aws-sdk');
-const { isEmail } = require('validator');
-const { checkAuth } = require('../utils/checkAuth');
 
 const documentClient = new AWS.DynamoDB.DocumentClient();
 
 module.exports.handler = async (event) => {
     try {
-        const response = checkAuth(event);
-        if (!isEmail(response)) {
-            const error = new Error(response);
-            error.statusCode = 401;
-            throw error;
-        };
-
         const { email } = event.pathParameters;
 
         if (!email) {
@@ -36,7 +27,6 @@ module.exports.handler = async (event) => {
             const error = new Error("User doesn't exist!");
             error.statusCode = 400;
             throw error;
-            
         }
 
         const { name, profilePicture, createdAt } = data.Item;
@@ -56,6 +46,9 @@ module.exports.handler = async (event) => {
             }),
         }
     } catch (err) {
+        if (err.message === "jwt malformed" || err.message === "jwt expired") {
+            err.statusCode = 403;
+        }
         return {
             statusCode: err.statusCode || 500,
             headers: {

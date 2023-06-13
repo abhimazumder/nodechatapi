@@ -1,7 +1,6 @@
 "use strict";
 
 const AWS = require('aws-sdk');
-const { isEmail } = require('validator');
 const { checkAuth } = require('../utils/checkAuth');
 const { fetchContent } = require('../utils/fetchContent');
 
@@ -9,15 +8,11 @@ const documentClient = new AWS.DynamoDB.DocumentClient();
 
 module.exports.handler = async (event) => {
     try {
-        const response = checkAuth(event);
-        if (!isEmail(response)) {
-            response.statusCode = 401;
-            throw response;
-        };
-        
+        const { email: _email, token } = checkAuth(event);
+
         const { email } = event.pathParameters;
 
-        if(!email){
+        if (!email) {
             const error = new Error("Email parameter is missing!");
             error.statusCode = 400;
             throw error;
@@ -27,16 +22,16 @@ module.exports.handler = async (event) => {
             TableName: 'MessageDetails',
             FilterExpression: '#field = :value',
             ExpressionAttributeNames: {
-              '#field': 'senderEmail',
+                '#field': 'senderEmail',
             },
             ExpressionAttributeValues: {
-              ':value': email,
+                ':value': email,
             },
         };
-    
+
         const data = await documentClient.scan(params).promise();
-    
-        for(let item of data.Items){
+
+        for (let item of data.Items) {
             item = await fetchContent(item);
         }
 
@@ -51,6 +46,9 @@ module.exports.handler = async (event) => {
         };
     }
     catch (err) {
+        if (err.message === "jwt malformed" || err.message === "jwt expired") {
+            err.statusCode = 403;
+        }
         return {
             statusCode: err.statusCode || 500,
             headers: {
@@ -59,8 +57,8 @@ module.exports.handler = async (event) => {
                 "Access-Control-Allow-Methods": "GET",
             },
             body: JSON.stringify({
-                message: err.message,
-            }),
+                message: err.message
+            })
         };
     }
 }

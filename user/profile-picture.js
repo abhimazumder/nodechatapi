@@ -1,7 +1,6 @@
 "use strict";
 
 const AWS = require('aws-sdk');
-const { isEmail } = require('validator');
 const { v4 } = require('uuid');
 const { checkAuth } = require('../utils/checkAuth');
 const { formDataParser } = require('../utils/formDataParser');
@@ -11,12 +10,7 @@ const documentClient = new AWS.DynamoDB.DocumentClient();
 
 module.exports.handler = async (event) => {
     try {
-        const response = checkAuth(event);
-        if (!isEmail(response)) {
-            const error = new Error(response);
-            error.statusCode = 401;
-            throw error;
-        };
+        const { email, token } = checkAuth(event);
 
         const formData = await formDataParser(event);
         const file = formData.files.file;
@@ -30,7 +24,7 @@ module.exports.handler = async (event) => {
         const params1 = {
             TableName: "UserDetails",
             Key: {
-                email: response
+                email: email
             },
         };
 
@@ -56,7 +50,7 @@ module.exports.handler = async (event) => {
         const params4 = {
             TableName: "UserDetails",
             Key: {
-                email: response
+                email: email
             },
             UpdateExpression: 'SET #newField = :newValue',
             ExpressionAttributeNames: {
@@ -78,17 +72,20 @@ module.exports.handler = async (event) => {
         }
     }
     catch (err) {
-    return {
-        statusCode: err.statusCode || 500,
-        headers: {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Headers": "multipart/form-data",
-            "Access-Control-Allow-Methods": "POST",
-        },
-        body: JSON.stringify({
-            message: err.message,
-        }),
-    };
-}
+        if (err.message === "jwt malformed" || err.message === "jwt expired") {
+            err.statusCode = 403;
+        }
+        return {
+            statusCode: err.statusCode || 500,
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Headers": "Content-Type",
+                "Access-Control-Allow-Methods": "GET",
+            },
+            body: JSON.stringify({
+                message: err.message
+            })
+        };
+    }
 
 };

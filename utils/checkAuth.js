@@ -3,24 +3,28 @@
 const jwt = require("jsonwebtoken");
 
 const checkAuth = (event) => {
-    try {
-        const authorizationHeader = event.headers["Authorization"];
 
-        if (!authorizationHeader) {
-            throw new Error("Missing Authorization header!");
-        }
+    const authorizationHeader = event.headers["Authorization"];
 
-        const [bearer, token] = authorizationHeader.split(" ");
+    if (!authorizationHeader) {
+        const error = new Error("Missing Authorization header!");
+        error.statusCode = 401;
+        throw error;
+    }
 
-        if (bearer !== "Bearer" || !token) {
-            throw new Error("Invalid Authorization header format!");
-        }
+    const [bearer, token] = authorizationHeader.split(" ");
 
-        var decoded = jwt.verify(token, "process.env.SECURE_KEY");
+    if (bearer !== "Bearer" || !token) {
+        const error = new Error("Invalid Authorization header format!");
+        error.statusCode = 401;
+        throw error;
+    }
 
-        return decoded.user;
-    } catch (err) {
-        return err.message;
+    const decoded = jwt.verify(token, "process.env.SECURE_KEY");
+
+    return {
+        email: decoded.user,
+        token : token
     }
 };
 

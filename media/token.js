@@ -1,36 +1,25 @@
 "use strict";
 
-const jwt = require("jsonwebtoken");
-const { createTokens } = require("../utils/createTokens");
+const { checkAuth } = require("../utils/checkAuth");
 
 module.exports.handler = async (event) => {
     try {
-        const { refreshToken } = JSON.parse(event.body);
-
-        if (!refreshToken) {
-            const error = new Error("Refresh token is required!");
-            error.statusCode(402)
-            throw error;
-        }
-
-        var decoded = jwt.verify(refreshToken, "process.env.SECURE_KEY");
-
-        const tokens = createTokens(decoded);
+        const { email, token } = checkAuth(event);
 
         return {
-            statusCode: 201,
+            statusCode: 200,
             headers: {
                 "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Headers": "Content-Type",
-                "Access-Control-Allow-Methods": "POST",
+                "Access-Control-Allow-Methods": "GET",
             },
             body: JSON.stringify({
-                tokens: tokens,
+                token : token,
             }),
-        };
+        }
     }
-    catch (err) {
-        if (err.message === "jwt malformed" || err.message === "jwt expired") {
+    catch(err){
+        if(err.message === "jwt malformed" || err.message === "jwt expired"){
             err.statusCode = 403;
         }
         return {
@@ -45,4 +34,4 @@ module.exports.handler = async (event) => {
             })
         };
     }
-};
+}

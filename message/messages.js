@@ -1,7 +1,6 @@
 "use strict";
 
 const AWS = require('aws-sdk');
-const { isEmail } = require('validator');
 const { checkAuth } = require('../utils/checkAuth');
 const { fetchContent } = require('../utils/fetchContent');
 
@@ -9,11 +8,7 @@ const documentClient = new AWS.DynamoDB.DocumentClient();
 
 module.exports.handler = async (event) => {
     try {
-        const response = checkAuth(event);
-        if (!isEmail(response)) {
-            response.statusCode = 401;
-            throw response;
-        };
+        const { email, token } = checkAuth(event);
         
         const params = {
             TableName: 'MessageDetails',
@@ -35,6 +30,9 @@ module.exports.handler = async (event) => {
         };
     }
     catch (err) {
+        if (err.message === "jwt malformed" || err.message === "jwt expired") {
+            err.statusCode = 403;
+        }
         return {
             statusCode: err.statusCode || 500,
             headers: {
@@ -43,8 +41,8 @@ module.exports.handler = async (event) => {
                 "Access-Control-Allow-Methods": "GET",
             },
             body: JSON.stringify({
-                message: err.message,
-            }),
+                message: err.message
+            })
         };
     }
 }

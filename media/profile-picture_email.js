@@ -11,13 +11,13 @@ module.exports.handler = async (event) => {
     try {
         const { email } = event.pathParameters;
 
-        if(!email){
+        if (!email) {
             const error = new Error("Email is missing!");
             error.statusCode = 400;
             throw error;
         }
 
-        if(!isEmail(email)){
+        if (!isEmail(email)) {
             const error = new Error("Email is not valid!");
             error.statusCode = 422;
             throw error;
@@ -26,19 +26,19 @@ module.exports.handler = async (event) => {
         const params1 = {
             TableName: 'UserDetails',
             Key: {
-                email : email
+                email: email
             },
         }
 
         const data1 = await documentClient.get(params1).promise();
 
-        if(!data1.Item){
+        if (!data1.Item) {
             const error = new Error("User doesn't exists!");
             error.statusCode = 404;
             throw error;
         }
 
-        if(!data1.Item.profilePicture){
+        if (!data1.Item.profilePicture) {
             const error = new Error("User doesn't have a profile picture!");
             error.statusCode = 404;
             throw error;
@@ -63,7 +63,10 @@ module.exports.handler = async (event) => {
             body: JSON.stringify(profilePicture),
         }
     }
-    catch(err){
+    catch (err) {
+        if (err.message === "jwt malformed" || err.message === "jwt expired") {
+            err.statusCode = 403;
+        }
         return {
             statusCode: err.statusCode || 500,
             headers: {
